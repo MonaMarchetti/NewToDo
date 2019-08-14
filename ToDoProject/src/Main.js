@@ -17,7 +17,7 @@ export default class Main extends React.Component {
   constructor(props) {
     super(props);
     this.loadTodos();
-    //this.deleteKeys();
+    //this.deleteAllTodos();
   }
 
   state = {
@@ -47,13 +47,9 @@ export default class Main extends React.Component {
     }
   };
 
-  deleteKeys = async () => {
+  deleteAllTodos = async () => {
     try {
-      const todos = await AsyncStorage.removeItem(TODO_STORAGE_KEY);
-      this.seState({
-        todos: JSON.parse(todos) || [],
-        loading: false
-      });
+      await AsyncStorage.removeItem(TODO_STORAGE_KEY);
     } catch (e) {
       console.log("Error while deleting Todo Keys >", e);
     }
@@ -69,9 +65,6 @@ export default class Main extends React.Component {
       title: this.state.todo,
       completed: false,
       createdOn: Date.now(),
-      notes: "",
-      dueDate: null,
-      remindMe: false,
       completedOn: null
     };
     const addedTodos = todos.concat([todo]);
@@ -82,17 +75,16 @@ export default class Main extends React.Component {
   checkBoxToggle = i => {
     const todos = this.state.todos;
     const checkedTodos = todos.map((todo, j) => {
-      if (j === i) {
-        const newCompleted = !todo.completed;
-        const newCompletedOn = todo.completed ? Date.now() : null;
-        return {
-          ...todo,
-          completed: newCompleted,
-          completedOn: newCompletedOn
-        };
-      } else {
+      if (j !== i) {
         return todo;
       }
+      const newCompleted = !todo.completed;
+      const newCompletedOn = todo.completed ? Date.now() : null;
+      return {
+        ...todo,
+        completed: newCompleted,
+        completedOn: newCompletedOn
+      };
     });
     this.setState({ todos: checkedTodos });
     this.save();
